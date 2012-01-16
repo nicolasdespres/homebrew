@@ -7,6 +7,12 @@ class Cmake < Formula
   bottle 'https://downloads.sf.net/project/machomebrew/Bottles/cmake-2.8.7-bottle.tar.gz'
   bottle_sha1 '8f4731fa17bf96afa2cdbfa48aaf6020a9836e3f'
 
+  def options
+    [
+     ['--enable-qt-gui', "Enable build of the Qt-based GUI (requires Qt >= 4.2)." ],
+    ]
+  end
+
   def install
     # A framework-installed expat will be detected and mess things up.
     if File.exist? "/Library/Frameworks/expat.framework"
@@ -26,12 +32,15 @@ class Cmake < Formula
       EOS
     end
 
-    system "./bootstrap", "--prefix=#{prefix}",
-                          "--system-libs",
-                          "--no-system-libarchive",
-                          "--datadir=/share/cmake",
-                          "--docdir=/share/doc/cmake",
-                          "--mandir=/share/man"
+    args = [ "--prefix=#{prefix}",
+             "--system-libs",
+             "--no-system-libarchive",
+             "--datadir=/share/cmake",
+             "--docdir=/share/doc/cmake",
+             "--mandir=/share/man",
+           ]
+    args << '--qt-gui' if ARGV.include? '--enable-qt-gui'
+    system "./bootstrap", *args
     system "make"
     system "make install"
   end
