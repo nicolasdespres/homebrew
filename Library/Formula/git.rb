@@ -19,8 +19,14 @@ class Git < Formula
 
   depends_on 'pcre' if build.include? 'with-pcre'
 
+  if build.include? 'build-doc'
+    depends_on 'asciidoc'
+    depends_on 'xmlto'
+  end
+
   option 'with-blk-sha1', 'Compile with the block-optimized SHA1 implementation'
   option 'with-pcre', 'Compile with the PCRE library'
+  option 'build-doc', 'Build documentation'
 
   def install
     # If these things are installed, tell Git build system to not use them
@@ -42,11 +48,18 @@ class Git < Formula
       ENV['LIBPCREDIR'] = HOMEBREW_PREFIX
     end
 
+
+    if build.include? 'build-doc'
+      ENV.deparallelize
+      args = [ 'all', 'doc', 'install', 'install-doc' ]
+    else
+      args = [ 'install' ]
+    end
     system "make", "prefix=#{prefix}",
                    "CC=#{ENV.cc}",
                    "CFLAGS=#{ENV.cflags}",
                    "LDFLAGS=#{ENV.ldflags}",
-                   "install"
+                   *args
 
     # Install the OS X keychain credential helper
     cd 'contrib/credential/osxkeychain' do
@@ -70,10 +83,12 @@ class Git < Formula
     (prefix+'etc/bash_completion.d').install 'contrib/completion/git-prompt.sh'
     (share+'git-core').install 'contrib'
 
-    # We could build the manpages ourselves, but the build process depends
-    # on many other packages, and is somewhat crazy, this way is easier.
-    GitManuals.new.brew { man.install Dir['*'] }
-    GitHtmldocs.new.brew { (share+'doc/git-doc').install Dir['*'] }
+    unless build.include? 'build-doc'
+      # We could build the manpages ourselves, but the build process depends
+      # on many other packages, and is somewhat crazy, this way is easier.
+      GitManuals.new.brew { man.install Dir['*'] }
+      GitHtmldocs.new.brew { (share+'doc/git-doc').install Dir['*'] }
+    end
   end
 
   def caveats; <<-EOS.undent
