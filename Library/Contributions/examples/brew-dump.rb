@@ -216,6 +216,31 @@ module TopoSort
 
 end # module TopoSort
 
+# Get the formula of the given _name_ using an ugly hack to get the optional
+# dependencies.
+# This is a work around these issues:
+# https://github.com/mxcl/homebrew/issues/10708
+# https://github.com/mxcl/homebrew/issues/10555
+# https://github.com/mxcl/homebrew/issues/10050
+def get_formula(name)
+  # Get the formula.
+  f = Formula.factory(name)
+  t = Tab.for_formula f
+  # Inject the options in ARGV.
+  opts = t.used_options
+  ARGV.concat(opts)
+  # Remove required formula.
+  klass_name = Formula.class_s(name)
+  Object.send(:remove_const, klass_name)
+  # Reload the formula
+  load f.path
+  klass = Object.const_get(klass_name)
+  f = klass.new(name)
+  # Remove the options from ARGV.
+  ARGV.delete_if{|x| opts.include? x }
+  f
+end
+
 # Compute the list of command to re-install all the formulae.
 INSTALLED = HOMEBREW_CELLAR.children.select{|pn| pn.directory? }.collect{|pn| pn.basename.to_s }
 if INSTALLED.empty?
@@ -227,7 +252,7 @@ GRAPH = {}
 GRAPH.extend TopoSort
 INSTALLED.each do |name|
   begin
-    f = Formula.factory(name)
+    f = get_formula(name)
     t = Tab.for_formula f
     options = []
     options << '--build-from-source' if t.built_bottle
