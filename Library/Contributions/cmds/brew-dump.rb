@@ -124,8 +124,9 @@ EOF
 cat <<EOF
 ================================================================================
 Warning:
- Some formula have not been re-installed probably because they had been
- installed from a path.
+ Some formula have not been re-installed because we failed to load it.  This
+ is probably due to a bug in Homebrew or because you have not installed a
+ formula using the proper way.
 
 Here the list:
 <% UNAVAILABLE_FORMULAE.each do |f| -%>
@@ -259,8 +260,9 @@ INSTALLED.each do |name|
     options += t.used_options
     GRAPH[f.name] = { :cmd => Command.new(f.name, options), :deps => f.deps }
   rescue FormulaUnavailableError => e
-    # TODO(Nicolas Despres): Would be handle properly once multiple repository
-    # support would be added (see https://github.com/mxcl/homebrew/pull/7643).
+    # NOTE(Nicolas Despres): This should never happens since multiple
+    # repository support has been added since Homebrew 0.9.  However, I prefer
+    # to keep this section just in case.
     error "Cannot find formula #{e.name}."
     UNAVAILABLE_FORMULAE << e.name
   end
