@@ -256,7 +256,7 @@ INSTALLED.each do |name|
     f = get_formula(name)
     t = Tab.for_formula f
     options = []
-    options << '--build-from-source' if t.built_bottle
+    options << '--build-from-source' unless t.built_bottle
     options += t.used_options
     GRAPH[f.name] = { :cmd => Command.new(f.name, options), :deps => f.deps }
   rescue FormulaUnavailableError => e
