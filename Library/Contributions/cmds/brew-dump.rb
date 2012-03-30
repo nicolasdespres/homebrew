@@ -209,7 +209,7 @@ module TopoSort
     return if mark.has_key? node
     mark[node] = true
     self[node][:deps].each do |succ|
-      topo_sort_rec(succ, mark, result, key)
+      topo_sort_rec(succ.to_s, mark, result, key)
     end
     result << self[node][key]
   end
