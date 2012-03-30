@@ -119,7 +119,7 @@ EOF
 <%= cmd %>
 <% end -%>
 
-<% if UNAVAILABLE_FORMULAE.empty? -%>
+<% unless UNAVAILABLE_FORMULAE.empty? -%>
 # Warn about unavailable formulae.
 cat <<EOF
 ================================================================================
