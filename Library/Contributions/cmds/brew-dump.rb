@@ -208,7 +208,7 @@ end # class Command
 # return in the sorted array.
 module TopoSort
 
-  # Work a Hash which is expected to be self.
+  # Work on a Hash which is expected to be self.
   def topo_sort(key = :obj)
     result = []
     mark = {} # Visited node
@@ -222,6 +222,10 @@ module TopoSort
 
   def topo_sort_rec(node, mark, result, key)
     return if mark.has_key? node
+    unless self.has_key? node
+      error "missing formula '#{node}'"
+      exit 1
+    end
     mark[node] = true
     self[node][:deps].each do |succ|
       topo_sort_rec(succ.to_s, mark, result, key)
